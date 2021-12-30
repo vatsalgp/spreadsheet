@@ -61,6 +61,10 @@ body {
     height: 100%;
 }
 
+.menu-icon.selected {
+    background-color: lightgray;
+}
+
 .menu-icon:hover {
     background-color: lightgray;
 }
@@ -79,7 +83,36 @@ body {
 }
 
 .formula-bar {
+    display: flex;
+    align-items: center;
     height: 5vh;
+    padding: 0 10px;
+    background-color: rgb(241, 241, 241);
+}
+
+.formula-editor {
+    display: flex;
+    align-items: center;
+    height: 70%;
+    border: 1px solid lightgray;
+    background-color: white;
+    padding: 0 10px;
+}
+
+.selected-cell {
+    width: 120px;
+}
+
+.function-sign {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+}
+
+.formula-input {
+    width: calc(100% - 160px);
+    outline-color: #107c41;
 }
 
 .data-container {
@@ -95,21 +128,59 @@ body {
 }
 
 .column-name-container {
+    display: flex;
     width: calc(100vw - 30px);
     height: 30px;
     border: 1px solid lightgray;
+}
+
+.column-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 100px;
+    border-right: 1px solid lightgray;
+    font-weight: bold;
 }
 
 .row-name-container {
     width: 30px;
     height: calc(75vh - 30px);
     border: 1px solid lightgray;
+    overflow: hidden;
+}
+
+.row-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 30px;
+    border-bottom: 1px solid lightgray;
+    font-weight: bold;
 }
 
 .input-cell-container {
     width: calc(100vw - 30px);
     height: calc(75vh - 30px);
     border: 1px solid lightgray;
+    overflow: hidden;
+}
+
+.cell-row {
+    display: flex;
+}
+
+.input-cell {
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+    min-height: 30px;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+
+.input-cell.selected {
+    border: 2px solid #107c41;
 }
 
 .sheet-bar {
