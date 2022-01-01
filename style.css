@@ -172,7 +172,6 @@ body {
 }
 
 .input-cell {
-    display: flex;
     align-items: center;
     min-width: 100px;
     min-height: 30px;

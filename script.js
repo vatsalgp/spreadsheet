@@ -1,6 +1,23 @@
 //Constants
 const rows = 100;
 const cols = 50;
+const defCellData = {
+    "text": "",
+    "font-weight": "",
+    "font-style": "",
+    "text-decoration": "",
+    "text-align": "left",
+    "background-color": "white",
+    "color": "black",
+    "font-family": "Noto Sans",
+    "font-size": "14px"
+};
+
+let selectedSheet = "Sheet1";
+let totalSheets = 1;
+let data = {
+    "Sheet1": {}
+};
 
 $(document).ready(() => {
     addColNames(cols);
@@ -47,25 +64,163 @@ const addCells = (rows, cols) => {
 }
 
 const getRowCol = e => {
-    const row = $(e.currentTarget).parent().attr("class").split(" ").filter(str => str.includes("rowId-"))[0].split("-")[1];
-    const col = $(e.currentTarget).attr("class").split(" ").filter(str => str.includes("colId-"))[0].split("-")[1];
-    return [parseInt(row), parseInt(col)];
+    const get = (o, s) => parseInt(o.attr("class").split(" ").filter(st => st.includes(s))[0].split("-")[1]);
+    const rowId = get($(e).parent(), "rowId-");
+    const colId = get($(e), "colId-");
+    return [rowId, colId];
+}
+
+const shallowEqualObject = (object1, object2) => {
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+    if (keys1.length !== keys2.length)
+        return false;
+    for (let key of keys1)
+        if (object1[key] !== object2[key])
+            return false;
+    return true;
+}
+
+const updateSelectedCell = (property, value, defaultable) => {
+    $(".input-cell.selected").each((i, e) => {
+        $(e).css(property, value);
+        const [rowId, colId] = getRowCol(e);
+        if (!data[selectedSheet][rowId]) {
+            if (defaultable)
+                return;
+            data[selectedSheet][rowId] = {};
+        }
+        if (!data[selectedSheet][rowId][colId]) {
+            if (defaultable)
+                return;
+            data[selectedSheet][rowId][colId] = {};
+        }
+        data[selectedSheet][rowId][colId][property] = value;
+        if (!defaultable)
+            return;
+        delete data[selectedSheet][rowId][colId][property];
+        if (shallowEqualObject({ ...defCellData, ...data[selectedSheet][rowId][colId] }, defCellData)) {
+            delete data[selectedSheet][rowId][colId];
+            if (shallowEqualObject(data[selectedSheet][rowId], {}))
+                delete data[selectedSheet][rowId];
+        }
+    });
+};
+
+const onInputCellControlClick = e => {
+    const [rowId, colId] = getRowCol(e.currentTarget);
+    if (rowId > 1 && $(`.rowId-${rowId - 1} .colId-${colId}`).hasClass("selected")) {
+        $(e.currentTarget).addClass("top-cell-selected");
+        $(`.rowId-${rowId - 1} .colId-${colId}`).addClass("bottom-cell-selected");
+    }
+    if (rowId < rows && $(`.rowId-${rowId + 1} .colId-${colId}`).hasClass("selected")) {
+        $(e.currentTarget).addClass("bottom-cell-selected");
+        $(`.rowId-${rowId + 1} .colId-${colId}`).addClass("top-cell-selected");
+    }
+    if (colId > 1 && $(`.rowId-${rowId} .colId-${colId - 1}`).hasClass("selected")) {
+        $(e.currentTarget).addClass("left-cell-selected");
+        $(`.rowId-${rowId} .colId-${colId - 1}`).addClass("right-cell-selected");
+    }
+    if (rowId < cols && $(`.rowId-${rowId} .colId-${colId + 1}`).hasClass("selected")) {
+        $(e.currentTarget).addClass("right-cell-selected");
+        $(`.rowId-${rowId} .colId-${colId + 1}`).addClass("left-cell-selected");
+    }
+}
+
+const changeHeader = e => {
+    const [rowId, colId] = getRowCol(e);
+    if (data[selectedSheet][rowId] && data[selectedSheet][rowId][colId]) {
+        const cellData = data[selectedSheet][rowId][colId];
+
+        if (cellData.hasOwnProperty("font-family"))
+            $(".font-family-selector").val(cellData["font-family"]);
+        else
+            $(".font-family-selector").val("Noto Sans");
+
+        if (cellData.hasOwnProperty("font-size"))
+            $(".font-size-selector").val(cellData["font-size"]);
+        else
+            $(".font-size-selector").val("14px");
+
+        if (cellData.hasOwnProperty("font-weight"))
+            $(".icon-bold").addClass("selected");
+        else
+            $(".icon-bold").removeClass("selected");
+
+        if (cellData.hasOwnProperty("font-style"))
+            $(".icon-italic").addClass("selected");
+        else
+            $(".icon-italic").removeClass("selected");
+
+        if (cellData.hasOwnProperty("text-decoration"))
+            $(".icon-underline").addClass("selected");
+        else
+            $(".icon-underline").removeClass("selected");
+
+        $(".align-icon.selected").removeClass("selected");
+        if (cellData.hasOwnProperty("text-align"))
+            $(`.icon-align-${cellData["text-align"]}`).addClass("selected");
+        else
+            $(".icon-align-left").addClass("selected");
+
+    } else {
+        $(".style-icon.selected").removeClass("selected");
+        $(".align-icon.selected").removeClass("selected");
+        $(".icon-align-left").addClass("selected");
+        $(".font-family-selector").val("Noto Sans");
+        $(".font-size-selector").val("14px");
+    }
 }
 
 const addEventListeners = () => {
+    $(".font-family-selector").change(e => {
+        const family = $(e.currentTarget).val();
+        updateSelectedCell("font-family", family, family === "Noto Sans");
+    });
+
+    $(".font-size-selector").change(e => {
+        const size = $(e.currentTarget).val();
+        updateSelectedCell("font-size", size, size === "14px");
+    });
+
     $(".icon-bold").click(e => {
-        const selected = $(e.currentTarget).hasClass("selected");
-        $(".input-cell.selected").css("font-weight", selected ? "" : "bold");
+        if ($(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("font-weight", "", true);
+        else
+            updateSelectedCell("font-weight", "bold", false);
     });
 
     $(".icon-italic").click(e => {
-        const selected = $(e.currentTarget).hasClass("selected");
-        $(".input-cell.selected").css("font-style", selected ? "" : "italic");
+        if ($(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("font-style", "", true);
+        else
+            updateSelectedCell("font-style", "italic", false);
     });
 
     $(".icon-underline").click(e => {
-        const selected = $(e.currentTarget).hasClass("selected");
-        $(".input-cell.selected").css("text-decoration", selected ? "" : "underline");
+        if ($(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("text-decoration", "", true);
+        else
+            updateSelectedCell("text-decoration", "underline", false);
+    });
+
+    $(".style-icon").click(e => {
+        $(e.currentTarget).toggleClass("selected");
+    });
+
+    $(".icon-align-left").click(e => {
+        if (!$(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("text-align", "left", true);
+    });
+
+    $(".icon-align-center").click(e => {
+        if (!$(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("text-align", "center", false);
+    });
+
+    $(".icon-align-right").click(e => {
+        if (!$(e.currentTarget).hasClass("selected"))
+            updateSelectedCell("text-align", "right", false);
     });
 
     $(".align-icon").click(e => {
@@ -73,33 +228,9 @@ const addEventListeners = () => {
         $(e.currentTarget).addClass("selected");
     });
 
-    $(".style-icon").click(e => {
-        $(e.currentTarget).toggleClass("selected");
-    });
-
     $(".input-cell").click(e => {
         if (e.ctrlKey) {
-            const [rowId, colId] = getRowCol(e);
-            const topCellSelected = rowId > 1 && $(`.rowId-${rowId - 1} .colId-${colId}`).hasClass("selected");
-            if (topCellSelected) {
-                $(e.currentTarget).addClass("top-cell-selected");
-                $(`.rowId-${rowId - 1} .colId-${colId}`).addClass("bottom-cell-selected");
-            }
-            const bottomCellSelected = rowId < rows && $(`.rowId-${rowId + 1} .colId-${colId}`).hasClass("selected")
-            if (bottomCellSelected) {
-                $(e.currentTarget).addClass("bottom-cell-selected");
-                $(`.rowId-${rowId + 1} .colId-${colId}`).addClass("top-cell-selected");
-            }
-            const leftCellSelected = colId > 1 && $(`.rowId-${rowId} .colId-${colId - 1}`).hasClass("selected");
-            if (leftCellSelected) {
-                $(e.currentTarget).addClass("left-cell-selected");
-                $(`.rowId-${rowId} .colId-${colId - 1}`).addClass("right-cell-selected");
-            }
-            const rightCellSelected = rowId < cols && $(`.rowId-${rowId} .colId-${colId + 1}`).hasClass("selected")
-            if (rightCellSelected) {
-                $(e.currentTarget).addClass("right-cell-selected");
-                $(`.rowId-${rowId} .colId-${colId + 1}`).addClass("left-cell-selected");
-            }
+            onInputCellControlClick(e);
         } else {
             $(".input-cell.selected").removeClass("selected");
             $(".input-cell.top-cell-selected").removeClass("top-cell-selected");
@@ -109,6 +240,7 @@ const addEventListeners = () => {
         }
         $(`.input-cell[contenteditable="true"]`).removeAttr("contenteditable");
         $(e.currentTarget).addClass("selected");
+        changeHeader(e.currentTarget);
     });
 
     $(".input-cell").dblclick(e => {
@@ -118,6 +250,10 @@ const addEventListeners = () => {
         $(e.currentTarget).attr("contenteditable", "true");
         $(e.currentTarget).focus();
     });
+
+    $(".input-cell.selected").change(e => {
+        console.log($(e.currentTarget).val);
+    })
 
     $(".input-cell-container").scroll(e => {
         $(".column-name-container").scrollLeft(e.currentTarget.scrollLeft);
