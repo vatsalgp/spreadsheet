@@ -82,6 +82,21 @@ body {
     font-size: 18px;
 }
 
+.icon-color-fill,
+.icon-color-text {
+    position: relative;
+}
+
+.color-picker {
+    position: absolute;
+    border: none;
+    width: 25px;
+    height: 12px;
+    padding: 0;
+    top: 25px;
+    cursor: pointer;
+}
+
 .formula-bar {
     display: flex;
     align-items: center;
@@ -177,6 +192,8 @@ body {
     min-height: 30px;
     border-right: 1px solid lightgray;
     border-bottom: 1px solid lightgray;
+    font-family: "Noto Sans";
+    font-size: 14px;
 }
 
 .input-cell.selected {
@@ -231,6 +248,7 @@ body {
 }
 
 .sheet-tab-container {
+    display: flex;
     border: 1px solid lightgray;
     width: calc(100vw - 110px);
 }
@@ -240,12 +258,18 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    border-bottom: 4px solid #107c41;
     padding: 0 10px;
     width: 80px;
+    border-left: 1px solid lightgray;
     border-right: 1px solid lightgray;
+    cursor: pointer;
+    margin-right: 5px;
 }
 
-.sheet-tab:hover {
+.sheet-tab.selected {
+    border-bottom: 4px solid #107c41;
+}
+
+.sheet-tab.selected:hover {
     cursor: default;
 }
