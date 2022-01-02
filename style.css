@@ -9,6 +9,7 @@ body {
 }
 
 .container {
+    position: relative;
     height: 100vh;
 }
 
@@ -217,6 +218,7 @@ body {
 }
 
 .sheet-bar {
+    padding-left: 20px;
     display: flex;
     align-items: center;
     height: 4vh;
@@ -272,4 +274,104 @@ body {
 
 .sheet-tab.selected:hover {
     cursor: default;
+}
+
+.sheet-options-modal {
+    position: absolute;
+    display: none;
+    bottom: 4vh;
+    background-color: white;
+    height: 60px;
+    width: 70px;
+    box-shadow: 0 0 3px 1px lightgray;
+}
+
+.sheet-rename,
+.sheet-delete {
+    height: 30px;
+    font-weight: 500;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sheet-rename:hover,
+.sheet-delete:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+
+.sheet-rename-modal {
+    position: absolute;
+    display: none;
+    height: 200px;
+    width: 300px;
+    top: calc(50vh - 100px);
+    left: calc(50vw - 150px);
+    background-color: white;
+    text-align: center;
+    box-shadow: 0 0 3px 1px lightgray;
+    padding: 25px;
+}
+
+.error-message {
+    display: none;
+    color: red;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.new-sheet-name {
+    height: 26px;
+    font-size: 18px;
+}
+
+.sheet-rename-modal .submit-button {
+    cursor: pointer;
+    background-color: #107c41;
+    color: white;
+    padding: 8px;
+}
+
+.sheet-rename-modal .cancel-button {
+    cursor: pointer;
+    background-color: lightgray;
+    padding: 8px;
+}
+
+.sheet-delete-modal {
+    position: absolute;
+    display: none;
+    height: 150px;
+    width: 300px;
+    top: calc(50vh - 75px);
+    left: calc(50vw - 150px);
+    background-color: white;
+    text-align: center;
+    box-shadow: 0 0 3px 1px lightgray;
+    padding: 15px;
+}
+
+.selected-sheet-name {
+    font-style: italic;
+}
+
+.sheet-delete-modal .submit-button {
+    cursor: pointer;
+    background-color: red;
+    color: white;
+    padding: 8px;
+}
+
+.sheet-delete-modal .cancel-button {
+    cursor: pointer;
+    background-color: lightgray;
+    padding: 8px;
 }

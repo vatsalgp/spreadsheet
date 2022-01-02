@@ -94,13 +94,33 @@
                 <div class="material-icons icon-right-scroll">arrow_right</div>
             </div>
             <div class="material-icons icon-add">add_circle</div>
-            <div class="sheet-tab-container">
-                <div class="sheet-tab selected" id="Sheet1">Sheet1</div>
+            <div class="sheet-tab-container"></div>
+        </div>
+        <div class="sheet-options-modal">
+            <div class="sheet-rename">Rename</div>
+            <div class="sheet-delete">Delete</div>
+        </div>
+        <div class="sheet-rename-modal">
+            <h3>Rename Sheet To:</h3>
+            <input type="text" class="new-sheet-name" placeholder="Sheet Name">
+            <div class="error-message">Name must be unique and not empty</div>
+            <div class="action-buttons">
+                <div class="submit-button">Rename</div>
+                <div class="cancel-button">Cancel</div>
+            </div>
+        </div>
+        <div class="sheet-delete-modal">
+            <h3>Delete <span class="selected-sheet-name"></span> ?</h3>
+            <div class="action-buttons">
+                <div class="submit-button">Delete</div>
+                <div class="cancel-button">Cancel</div>
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="constants.js"></script>
     <script src="script.js"></script>
+    <script src="event-listeners.js"></script>
 </body>
 
 </html>

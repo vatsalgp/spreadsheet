@@ -1,52 +1,53 @@
-//Constants
-const ROWS = 100;
-const COLS = 50;
-
-const TEXT = "text";
-const FONT_WEIGHT = "font-weight";
-const FONT_STYLE = "font-style";
-const TEXT_DECORATION = "text-decoration";
-const TEXT_ALIGN = "text-align";
-const BACKGROUND_COLOR = "background-color";
-const COLOR = "color";
-const FONT_FAMILY = "font-family";
-const FONT_SIZE = "font-size";
-
-const DEF_CELL_DATA = {
-    [TEXT]: "",
-    [FONT_WEIGHT]: "",
-    [FONT_STYLE]: "",
-    [TEXT_DECORATION]: "",
-    [TEXT_ALIGN]: "left",
-    [BACKGROUND_COLOR]: "#ffffff",
-    [COLOR]: "#000000",
-    [FONT_FAMILY]: "Noto Sans",
-    [FONT_SIZE]: "14px"
-};
-
-const DATA = {
-    "Sheet1": {
-        1: {
-            1: {
-                "text": "Default Text",
-                "font-size": "16px",
-                "color": "#ffffff",
-                "background-color": "#ff0000"
-            }
-        }
-    }
-};
-
-let selectedSheet = "Sheet1";
-let totalSheets = 1;
-
 $(document).ready(() => {
     addColNames(COLS);
     addRowNames(ROWS);
     addCells(ROWS, COLS);
-    addEventListeners();
-    loadSelectedSheet();
+    loadSheetBarAndFirstSheet();
 });
+
+const getSelectedSheet = () => $(".sheet-tab.selected").attr("id");
+const getNumberOfSheets = () => Object.keys(DATA).length;
+
+const loadSheetBarAndFirstSheet = () => {
+    if (getNumberOfSheets() == 0)
+        $(".icon-add").click();
+    else {
+        for (const sheetName in DATA)
+            addSheetToBar(sheetName);
+        $(".sheet-tab").first().addClass("selected");
+        loadSelectedSheet();
+    }
+};
+
+const addSheetToBar = sheetName => {
+    const sheet = $(`<div class="sheet-tab" id="${sheetName}">${sheetName}</div>`);
+    sheet.appendTo($(".sheet-tab-container"));
+    sheet.click(e => {
+        if (!$(e.currentTarget).hasClass("selected")) {
+            $(".sheet-tab.selected").removeClass("selected");
+            $(e.currentTarget).addClass("selected");
+            emptySheet();
+            loadSelectedSheet();
+        }
+    });
+    sheet.contextmenu(e => {
+        e.preventDefault();
+        sheet.click();
+        const modal = $(".sheet-options-modal");
+        modal.css("left", e.pageX);
+        modal.css("display", "block");
+        $(".sheet-rename").click(() => {
+            $(".sheet-rename-modal").css("display", "block");
+            $(".new-sheet-name").focus();
+            $(".error-message").css("display", "none");
+        });
+        $(".sheet-delete").click(() => {
+            $(".sheet-delete-modal").css("display", "block");
+            $(".selected-sheet-name").text(getSelectedSheet());
+        });
+    });
+    return sheet;
+};
 
 const emptySheet = () => $(".input-cell").each((i, e) => {
     for (const [property, value] of Object.entries(DEF_CELL_DATA))
@@ -55,7 +56,7 @@ const emptySheet = () => $(".input-cell").each((i, e) => {
 });
 
 const loadSelectedSheet = () => {
-    const sheet = DATA[selectedSheet];
+    const sheet = DATA[getSelectedSheet()];
     for (const rowId in sheet) {
         for (const colId in sheet[rowId]) {
             const cellData = sheet[rowId][colId];
@@ -66,22 +67,6 @@ const loadSelectedSheet = () => {
                 cell.text(cellData[TEXT]);
         }
     }
-};
-
-const createSheet = () => {
-    totalSheets++;
-    selectedSheet = "Sheet" + totalSheets;
-    DATA[selectedSheet] = {};
-    const sheet = $(`<div class="sheet-tab" id="${selectedSheet}">${selectedSheet}</div>`);
-    sheet.appendTo($(".sheet-tab-container"));
-    sheet.click(onClickOnSheet);
-}
-
-const showSelectedSheet = () => {
-    $(".sheet-tab.selected").removeClass("selected");
-    $(`#${selectedSheet}`).addClass("selected");
-    emptySheet();
-    loadSelectedSheet();
 };
 
 const calcColCode = id => {
@@ -142,24 +127,25 @@ const shallowEqualObject = (object1, object2) => {
 const updateSelectedCell = (property, value, defaultable) => $(".input-cell.selected").each((i, e) => {
     $(e).css(property, value);
     const [rowId, colId] = getRowCol(e);
-    if (!DATA[selectedSheet][rowId]) {
+    const sheet = DATA[getSelectedSheet()];
+    if (!sheet[rowId]) {
         if (defaultable)
             return;
-        DATA[selectedSheet][rowId] = {};
+        sheet[rowId] = {};
     }
-    if (!DATA[selectedSheet][rowId][colId]) {
+    if (!sheet[rowId][colId]) {
         if (defaultable)
             return;
-        DATA[selectedSheet][rowId][colId] = {};
+        sheet[rowId][colId] = {};
     }
-    DATA[selectedSheet][rowId][colId][property] = value;
+    sheet[rowId][colId][property] = value;
     if (!defaultable)
         return;
-    delete DATA[selectedSheet][rowId][colId][property];
-    if (shallowEqualObject({ ...DEF_CELL_DATA, ...DATA[selectedSheet][rowId][colId] }, DEF_CELL_DATA)) {
-        delete DATA[selectedSheet][rowId][colId];
-        if (shallowEqualObject(DATA[selectedSheet][rowId], {}))
-            delete DATA[selectedSheet][rowId];
+    delete sheet[rowId][colId][property];
+    if (shallowEqualObject({ ...DEF_CELL_DATA, ...sheet[rowId][colId] }, DEF_CELL_DATA)) {
+        delete sheet[rowId][colId];
+        if (shallowEqualObject(sheet[rowId], {}))
+            delete sheet[rowId];
     }
 });
 
@@ -185,8 +171,9 @@ const onInputCellControlClick = e => {
 
 const updateIconBar = e => {
     const [rowId, colId] = getRowCol(e);
-    if (DATA[selectedSheet][rowId] && DATA[selectedSheet][rowId][colId]) {
-        const cellData = DATA[selectedSheet][rowId][colId];
+    const sheet = DATA[getSelectedSheet()];
+    if (sheet[rowId] && sheet[rowId][colId]) {
+        const cellData = sheet[rowId][colId];
 
         if (cellData.hasOwnProperty(FONT_FAMILY))
             $(".font-family-selector").val(cellData[FONT_FAMILY]);
@@ -237,122 +224,4 @@ const updateIconBar = e => {
         $(".background-color-picker").val(DEF_CELL_DATA[BACKGROUND_COLOR]);
         $(".text-color-picker").val(DEF_CELL_DATA[COLOR]);
     }
-}
-
-const onClickOnSheet = e => {
-    if (!$(e.currentTarget).hasClass("selected")) {
-        selectedSheet = e.currentTarget.innerText;
-        showSelectedSheet();
-    }
-}
-
-const addEventListeners = () => {
-    $(".font-family-selector").change(e => {
-        const family = $(e.currentTarget).val();
-        updateSelectedCell(FontFamily, family, family === DEF_CELL_DATA[FontFamily]);
-    });
-
-    $(".font-size-selector").change(e => {
-        const size = $(e.currentTarget).val();
-        updateSelectedCell(FONT_SIZE, size, size === DEF_CELL_DATA[FONT_SIZE]);
-    });
-
-    $(".icon-bold").click(e => {
-        if ($(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(FONT_WEIGHT, "", true);
-        else
-            updateSelectedCell(FONT_WEIGHT, "bold", false);
-    });
-
-    $(".icon-italic").click(e => {
-        if ($(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(FONT_STYLE, "", true);
-        else
-            updateSelectedCell(FONT_STYLE, "italic", false);
-    });
-
-    $(".icon-underline").click(e => {
-        if ($(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(TEXT_DECORATION, "", true);
-        else
-            updateSelectedCell(TEXT_DECORATION, "underline", false);
-    });
-
-    $(".style-icon").click(e => {
-        $(e.currentTarget).toggleClass("selected");
-    });
-
-    $(".icon-align-left").click(e => {
-        if (!$(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(TEXT_ALIGN, "left", true);
-    });
-
-    $(".icon-align-center").click(e => {
-        if (!$(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(TEXT_ALIGN, "center", false);
-    });
-
-    $(".icon-align-right").click(e => {
-        if (!$(e.currentTarget).hasClass("selected"))
-            updateSelectedCell(TEXT_ALIGN, "right", false);
-    });
-
-    $(".align-icon").click(e => {
-        $(".align-icon.selected").removeClass("selected");
-        $(e.currentTarget).addClass("selected");
-    });
-
-    $(".background-color-picker").change(e => {
-        const color = e.currentTarget.value;
-        updateSelectedCell(BACKGROUND_COLOR, color, color === DEF_CELL_DATA[BACKGROUND_COLOR]);
-    });
-
-    $(".text-color-picker").change(e => {
-        const color = e.currentTarget.value;
-        updateSelectedCell(COLOR, color, color === DEF_CELL_DATA[color]);
-    });
-
-    $(".icon-color-fill div").click(() => $(".background-color-picker").click());
-
-    $(".icon-color-text div").click(() => $(".text-color-picker").click());
-
-    $(".input-cell-container").scroll(e => {
-        $(".column-name-container").scrollLeft(e.currentTarget.scrollLeft);
-        $(".row-name-container").scrollTop(e.currentTarget.scrollTop);
-    });
-
-    $(".input-cell").click(e => {
-        if (e.ctrlKey) {
-            onInputCellControlClick(e);
-        } else {
-            $(".input-cell.selected").removeClass("selected");
-            $(".input-cell.top-cell-selected").removeClass("top-cell-selected");
-            $(".input-cell.bottom-cell-selected").removeClass("bottom-cell-selected");
-            $(".input-cell.left-cell-selected").removeClass("left-cell-selected");
-            $(".input-cell.right-cell-selected").removeClass("right-cell-selected");
-        }
-        $(`.input-cell[contenteditable="true"]`).removeAttr("contenteditable");
-        $(e.currentTarget).addClass("selected");
-        updateIconBar(e.currentTarget);
-    });
-
-    $(".input-cell").dblclick(e => {
-        $(".input-cell.selected").removeClass("selected");
-        $(e.currentTarget).addClass("selected");
-        $(`.input-cell[contenteditable="true"]`).removeAttr("contenteditable");
-        $(e.currentTarget).attr("contenteditable", "true");
-        $(e.currentTarget).focus();
-    });
-
-    $(".input-cell").blur(e => {
-        const text = e.currentTarget.innerText;
-        updateSelectedCell(TEXT, text, text === "");
-    });
-
-    $(".icon-add").click(e => {
-        createSheet();
-        showSelectedSheet();
-    });
-
-    $(".sheet-tab").click(onClickOnSheet);
 }
