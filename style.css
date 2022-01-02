@@ -15,6 +15,7 @@ body {
 
 .title-bar {
     display: flex;
+    font-size: 20px;
     justify-content: center;
     align-items: center;
     height: 5vh;
@@ -132,7 +133,7 @@ body {
 }
 
 .data-container {
-    height: 75vh;
+    height: 85vh;
     display: flex;
     flex-wrap: wrap;
 }
@@ -162,7 +163,7 @@ body {
 
 .row-name-container {
     width: 30px;
-    height: calc(75vh - 30px);
+    height: calc(85vh - 30px);
     border: 1px solid lightgray;
     overflow: hidden;
 }
@@ -178,7 +179,7 @@ body {
 
 .input-cell-container {
     width: calc(100vw - 30px);
-    height: calc(75vh - 30px);
+    height: calc(85vh - 30px);
     border: 1px solid lightgray;
     overflow: scroll;
 }
@@ -251,7 +252,6 @@ body {
 
 .sheet-tab-container {
     display: flex;
-    border: 1px solid lightgray;
     width: calc(100vw - 110px);
 }
 
@@ -262,8 +262,7 @@ body {
     font-weight: 600;
     padding: 0 10px;
     width: 80px;
-    border-left: 1px solid lightgray;
-    border-right: 1px solid lightgray;
+    border: 1px solid lightgray;
     cursor: pointer;
     margin-right: 5px;
 }

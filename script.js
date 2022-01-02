@@ -2,6 +2,7 @@ $(document).ready(() => {
     addColNames(COLS);
     addRowNames(ROWS);
     addCells(ROWS, COLS);
+    addEventListeners();
     loadSheetBarAndFirstSheet();
 });
 
