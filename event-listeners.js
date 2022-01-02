@@ -5,7 +5,7 @@ const addEventListeners = () => {
 
     $(".font-family-selector").change(e => {
         const family = $(e.currentTarget).val();
-        updateSelectedCell(FontFamily, family, family === DEF_CELL_DATA[FontFamily]);
+        updateSelectedCell(FONT_FAMILY, family, family === DEF_CELL_DATA[FONT_FAMILY]);
     });
 
     $(".font-size-selector").change(e => {
